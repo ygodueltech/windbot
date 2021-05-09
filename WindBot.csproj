@@ -112,6 +112,7 @@
     <Compile Include="Game\AI\Decks\Rank5Executor.cs" />
     <Compile Include="Game\AI\Decks\ZoodiacExecutor.cs" />
     <Compile Include="Game\AI\Decks\ZexalWeaponsExecutor.cs" />
+    <Compile Include="Game\AI\Decks\BeaterExecutor.cs" />
     <Compile Include="Game\AI\DefaultExecutor.cs" />
     <Compile Include="Game\AI\Dialogs.cs" />
     <Compile Include="Game\AI\Enums\DangerousMonster.cs" />
@@ -165,9 +166,7 @@
     <Content Include="WindBot.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
   </Target>
   <Target Name="AfterBuild">
   </Target>
