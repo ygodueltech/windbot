@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using WindBot.Game.AI;
 using YGOSharp.OCGWrapper.Enums;
@@ -101,7 +102,7 @@ namespace WindBot.Game
             m_option = -1;
             m_yesno = -1;
             m_announce = 0;
-           
+
             m_place = 0;
             if (Duel.Player == 0 && Duel.Phase == DuelPhase.Draw)
             {
@@ -127,7 +128,7 @@ namespace WindBot.Game
         {
             Executor.OnChaining(player,card);
         }
-        
+
         /// <summary>
         /// Called when a chain has been solved.
         /// </summary>
@@ -310,7 +311,7 @@ namespace WindBot.Game
             // If we're forced to chain, we chain the first card. However don't do anything.
             return forced ? 0 : -1;
         }
-        
+
         /// <summary>
         /// Called when the AI has to use one or more counters.
         /// </summary>
@@ -381,6 +382,7 @@ namespace WindBot.Game
         public MainPhaseAction OnSelectIdleCmd(MainPhase main)
         {
             Executor.SetMain(main);
+            Console.WriteLine("||||||||||||||||||||||main phase||||||||||||||||||||||||||");
             foreach (CardExecutor exec in Executor.Executors)
             {
             	if (exec.Type == ExecutorType.GoToEndPhase && main.CanEndPhase && exec.Func()) // check if should enter end phase directly
@@ -393,8 +395,9 @@ namespace WindBot.Game
                     return new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase);
                 }
                 // NOTICE: GoToBattlePhase and GoToEndPhase has no "card" can be accessed to ShouldExecute(), so instead use exec.Func() to check ...
-                // enter end phase and enter battle pahse is in higher priority. 
+                // enter end phase and enter battle pahse is in higher priority.
 
+                Console.WriteLine("===========================activates");
                 for (int i = 0; i < main.ActivableCards.Count; ++i)
                 {
                     ClientCard card = main.ActivableCards[i];
@@ -404,6 +407,7 @@ namespace WindBot.Game
                         return new MainPhaseAction(MainPhaseAction.MainAction.Activate, card.ActionActivateIndex[main.ActivableDescs[i]]);
                     }
                 }
+                Console.WriteLine("===========================set");
                 foreach (ClientCard card in main.MonsterSetableCards)
                 {
                     if (ShouldExecute(exec, card, ExecutorType.MonsterSet))
@@ -425,8 +429,10 @@ namespace WindBot.Game
                         return new MainPhaseAction(MainPhaseAction.MainAction.SpSummon, card.ActionIndex);
                     }
                 }
+                Console.WriteLine("===========================summ");
                 foreach (ClientCard card in main.SummonableCards)
                 {
+                    Console.WriteLine($"should summon? {card.Id}");
                     if (ShouldExecute(exec, card, ExecutorType.Summon))
                     {
                         _dialogs.SendSummon(card.Name);
@@ -454,7 +460,7 @@ namespace WindBot.Game
                 return new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase);
 
             _dialogs.SendEndTurn();
-            return new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase); 
+            return new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase);
         }
 
         /// <summary>
@@ -743,7 +749,7 @@ namespace WindBot.Game
         // _ Others functions _
         // Those functions are used by the AI behavior.
 
-        
+
         private CardSelector m_materialSelector;
         private int m_place;
         private int m_option;
@@ -1106,11 +1112,15 @@ namespace WindBot.Game
                     return false;
             }
             Executor.SetCard(type, card, desc);
-            bool result = card != null && exec.Type == type &&
-                (exec.CardId == -1 || exec.CardId == card.Id) &&
-                (exec.Func == null || exec.Func());
+
+            bool greedyResult = card != null && exec.Type == ExecutorType.Greedy && type != ExecutorType.MonsterSet;
+            bool defaultResult = card != null && (exec.Type == type) && (exec.CardId == -1 || exec.CardId == card.Id ) && (exec.Func == null || exec.Func());
+            bool result = greedyResult || defaultResult;
+
+            Console.WriteLine($"ShouldExecute {type} {exec.Type} {card.Id} -- {result}");
             if (card.Id != 0 && type == ExecutorType.Activate && result)
             {
+                Console.WriteLine($"activating {card.Id}");
                 int count = card.IsDisabled() ? 3 : 1;
                 if (!_activatedCards.ContainsKey(card.Id))
                 {

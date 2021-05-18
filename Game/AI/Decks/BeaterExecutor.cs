@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using WindBot;
 using WindBot.Game;
@@ -29,20 +30,22 @@ namespace WindBot.Game.AI.Decks
 
         public BeaterExecutor(GameAI ai, Duel duel) : base(ai, duel)
         {
-            AddExecutor(ExecutorType.Summon, CardId.AlexandriteDragon);
-            AddExecutor(ExecutorType.Summon, CardId.ShinyblackSquadder);
-            AddExecutor(ExecutorType.Summon, CardId.LuterDragon);
-            AddExecutor(ExecutorType.Summon, CardId.Zombino);
-            AddExecutor(ExecutorType.Summon, CardId.VorseRaider);
-            AddExecutor(ExecutorType.Summon, CardId.MyteryShellDragon);
-            AddExecutor(ExecutorType.Summon, CardId.InsectKnight);
-            AddExecutor(ExecutorType.Summon, CardId.Sabersaurus);
-            AddExecutor(ExecutorType.Summon, CardId.Leotron);
-            AddExecutor(ExecutorType.Summon, CardId.GeneWarpedWarwolf);
-            AddExecutor(ExecutorType.Summon, CardId.PhantomGryphon);
-            AddExecutor(ExecutorType.Summon, CardId.EvilswarmHeliotrope);
-            AddExecutor(ExecutorType.Summon, CardId.MegalosmasherX);
-            AddExecutor(ExecutorType.Summon, CardId.MekkKnightAvram);
+            Console.WriteLine("foo");
+            AddExecutor(ExecutorType.Greedy, -1);
+            //AddExecutor(ExecutorType.Summon, CardId.AlexandriteDragon);
+            //AddExecutor(ExecutorType.Summon, CardId.ShinyblackSquadder);
+            //AddExecutor(ExecutorType.Summon, CardId.LuterDragon);
+            //AddExecutor(ExecutorType.Summon, CardId.Zombino);
+            //AddExecutor(ExecutorType.Summon, CardId.VorseRaider);
+            //AddExecutor(ExecutorType.Summon, CardId.MyteryShellDragon);
+            //AddExecutor(ExecutorType.Summon, CardId.InsectKnight);
+            //AddExecutor(ExecutorType.Summon, CardId.Sabersaurus);
+            //AddExecutor(ExecutorType.Summon, CardId.Leotron);
+            //AddExecutor(ExecutorType.Summon, CardId.GeneWarpedWarwolf);
+            //AddExecutor(ExecutorType.Summon, CardId.PhantomGryphon);
+            //AddExecutor(ExecutorType.Summon, CardId.EvilswarmHeliotrope);
+            //AddExecutor(ExecutorType.Summon, CardId.MegalosmasherX);
+            //AddExecutor(ExecutorType.Summon, CardId.MekkKnightAvram);
         }
 
     }

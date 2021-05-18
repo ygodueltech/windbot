@@ -124,6 +124,7 @@ namespace WindBot.Game.AI
         protected DefaultExecutor(GameAI ai, Duel duel)
             : base(ai, duel)
         {
+            Console.WriteLine("DefaultExecutor");
             AddExecutor(ExecutorType.Activate, _CardId.ChickenGame, DefaultChickenGame);
             AddExecutor(ExecutorType.Activate, _CardId.SantaClaws);
         }
@@ -170,7 +171,7 @@ namespace WindBot.Game.AI
                 if (defender.IsMonsterDangerous())
                 {
                     bool canIgnoreIt = !attacker.IsDisabled() && (
-                        attacker.IsCode(_CardId.UltimateConductorTytanno) && defender.IsDefense() || 
+                        attacker.IsCode(_CardId.UltimateConductorTytanno) && defender.IsDefense() ||
                         attacker.IsCode(_CardId.ElShaddollConstruct) && defender.IsSpecialSummoned ||
                         attacker.IsCode(_CardId.AllyOfJusticeCatastor) && !defender.HasAttribute(CardAttribute.Dark));
                     if (!canIgnoreIt)
