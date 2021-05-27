@@ -171,7 +171,9 @@ namespace WindBot
             WindBotInfo Info = (WindBotInfo)o;
             GameClient client = new GameClient(Info);
             client.Start();
+            Console.WriteLine("is debug show up");
             Logger.DebugWriteLine(client.Username + " started.");
+            Console.WriteLine("is debug show up");
             while (client.Connection.IsConnected)
             {
 #if !DEBUG

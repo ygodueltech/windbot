@@ -25,7 +25,7 @@ namespace WindBot.Game
         private Room _room;
         private Duel _duel;
         private int _hand;
-        private bool _debug;        
+        private bool _debug;
         private int _select_hint;
         private GameMessage _lastMessage;
 
@@ -34,7 +34,7 @@ namespace WindBot.Game
             Game = game;
             Connection = game.Connection;
             _hand = game.Hand;
-            _debug = game.Debug;           
+            _debug = game.Debug;
             _packets = new Dictionary<StocMessage, Action<BinaryReader>>();
             _messages = new Dictionary<GameMessage, Action<BinaryReader>>();
             RegisterPackets();
@@ -274,7 +274,7 @@ namespace WindBot.Game
 
             //Connection.Close();
         }
-        
+
         private void OnDuelEnd(BinaryReader packet)
         {
             Connection.Close();
@@ -284,8 +284,13 @@ namespace WindBot.Game
         {
             int player = packet.ReadInt16();
             string message = packet.ReadUnicode(256);
-            string myName = (player != 0) ? _room.Names[1] : _room.Names[0];
-            string otherName = (player == 0) ? _room.Names[1] : _room.Names[0];
+
+            string roomnames = string.Join(",", _room.Names);
+
+
+            string otherName = (player != 0) ? _room.Names[1] : _room.Names[0];
+            string myName = (player == 0) ? _room.Names[1] : _room.Names[0];
+            Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={player};myName={myName};otherName={otherName}");
             if (player < 4)
                 Logger.DebugWriteLine(otherName + " say to " + myName + ": " + message);
         }
@@ -518,11 +523,24 @@ namespace WindBot.Game
 
         private void OnDamage(BinaryReader packet)
         {
-            int player = GetLocalPlayer(packet.ReadByte());
+            int absplayer = packet.ReadByte();
+            int player = GetLocalPlayer(absplayer);
+
             int final = _duel.Fields[player].LifePoints - packet.ReadInt32();
             if (final < 0) final = 0;
-            if (_debug)
+            if (_debug) {
+                //string myName = _room.Position == 0 ? _room.Names[0] : _room.Names[1];
+                //string otherName = _room.Position == 0 ? _room.Names[1] : _room.Names[0];
+                //string myName = _room.Names[player];
+                string otherName = _room.Names[absplayer];
+                string myName = _room.Names[absplayer];
+                string roomnames = string.Join(",", _room.Names);
+
+                Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={absplayer};myName={myName};otherName={otherName}");
+
                 Logger.WriteLine("(" + player.ToString() + " got damage , LifePoint left = " + final.ToString() + ")");
+                Logger.WriteLine("(" + myName + " got damage , LifePoint left = " + final.ToString() + ")");
+            }
             _duel.Fields[player].LifePoints = final;
         }
 
@@ -545,15 +563,25 @@ namespace WindBot.Game
         {
             // TODO: update equip cards and target cards
             int cardId = packet.ReadInt32();
-            int previousControler = GetLocalPlayer(packet.ReadByte());
+            //int previousControler = GetLocalPlayer(packet.ReadByte());
+            int absplayerPrevious = (packet.ReadByte());
+            int previousControler = GetLocalPlayer(absplayerPrevious);
+
             int previousLocation = packet.ReadByte();
             int previousSequence = packet.ReadSByte();
             /*int previousPosotion = */packet.ReadSByte();
-            int currentControler = GetLocalPlayer(packet.ReadByte());
+
+            //int currentControler = GetLocalPlayer(packet.ReadByte());
+            int absplayerCurrent = (packet.ReadByte());
+            int currentControler = GetLocalPlayer(absplayerCurrent);
+
             int currentLocation = packet.ReadByte();
             int currentSequence = packet.ReadSByte();
             int currentPosition = packet.ReadSByte();
             packet.ReadInt32(); // reason
+
+            string prevName = _room.Names[absplayerPrevious];
+            string curName = _room.Names[absplayerCurrent];
 
             ClientCard card = _duel.GetCard(previousControler, (CardLocation)previousLocation, previousSequence);
             if ((previousLocation & (int)CardLocation.Overlay) != 0)
@@ -562,8 +590,10 @@ namespace WindBot.Game
                 card = _duel.GetCard(previousControler, (CardLocation)previousLocation, previousSequence);
                 if (card != null)
                 {
-                    if (_debug)
-                        Logger.WriteLine("(" + previousControler.ToString() + " 's " + (card.Name ?? "UnKnowCard") + " deattach " + (NamedCard.Get(cardId)?.Name) + ")");
+                    if (_debug) {
+                        //Logger.WriteLine("(" + previousControler.ToString() + " 's " + (card.Name ?? "UnKnowCard") + " deattach " + (NamedCard.Get(cardId)?.Name) + ")");
+                        Logger.WriteLine("(" + prevName + " 's " + (card.Name ?? "UnKnowCard") + " deattach " + (NamedCard.Get(cardId)?.Name) + ")");
+                        }
                     card.Overlays.Remove(cardId);
                 }
                 previousLocation = 0; // the card is removed when it go to overlay, so here we treat it as a new card
@@ -577,8 +607,10 @@ namespace WindBot.Game
                 card = _duel.GetCard(currentControler, (CardLocation)currentLocation, currentSequence);
                 if (card != null)
                 {
-                    if (_debug)
-                        Logger.WriteLine("(" + previousControler.ToString() + " 's " + (card.Name ?? "UnKnowCard") + " overlay " + (NamedCard.Get(cardId)?.Name) + ")");
+                    if (_debug) {
+                        //Logger.WriteLine("(" + previousControler.ToString() + " 's " + (card.Name ?? "UnKnowCard") + " overlay " + (NamedCard.Get(cardId)?.Name) + ")");
+                        Logger.WriteLine("(" + prevName + " 's " + (card.Name ?? "UnKnowCard") + " overlay " + (NamedCard.Get(cardId)?.Name) + ")");
+                    }
                     card.Overlays.Add(cardId);
                 }
             }
@@ -586,9 +618,12 @@ namespace WindBot.Game
             {
                 if (previousLocation == 0)
                 {
-                    if (_debug)
-                        Logger.WriteLine("(" + previousControler.ToString() + " 's " + (NamedCard.Get(cardId)?.Name)
+                    if (_debug) {
+                        //Logger.WriteLine("(" + previousControler.ToString() + " 's " + (NamedCard.Get(cardId)?.Name)
+                        //+ " appear in " + (CardLocation)currentLocation + ")");
+                        Logger.WriteLine("(" +prevName + " 's " + (NamedCard.Get(cardId)?.Name)
                         + " appear in " + (CardLocation)currentLocation + ")");
+                    }
                     _duel.AddCard((CardLocation)currentLocation, cardId, currentControler, currentSequence, currentPosition);
                 }
                 else
@@ -596,10 +631,14 @@ namespace WindBot.Game
                     _duel.AddCard((CardLocation)currentLocation, card, currentControler, currentSequence, currentPosition, cardId);
                     if (card != null && previousLocation != currentLocation)
                         card.IsSpecialSummoned = false;
-                    if (_debug && card != null)
-                        Logger.WriteLine("(" + previousControler.ToString() + " 's " + (card.Name ?? "UnKnowCard")
+                    if (_debug && card != null) {
+                        //Logger.WriteLine("(" + previousControler.ToString() + " 's " + (card.Name ?? "UnKnowCard")
+                        //+ " from " +
+                        //(CardLocation)previousLocation + " move to " + (CardLocation)currentLocation + ")");
+                        Logger.WriteLine("(" + prevName + " 's " + (card.Name ?? "UnKnowCard")
                         + " from " +
                         (CardLocation)previousLocation + " move to " + (CardLocation)currentLocation + ")");
+                    }
                 }
             }
         }
@@ -642,7 +681,7 @@ namespace WindBot.Game
             {
                 if (defendcard == null) Logger.WriteLine("(" + (attackcard.Name ?? "UnKnowCard") + " direct attack!!)");
                 else Logger.WriteLine("(" + ca.ToString() + " 's " + (attackcard.Name ?? "UnKnowCard") + " attack  " + cd.ToString() + " 's " + (defendcard.Name ?? "UnKnowCard") + ")");
-            }                
+            }
             _duel.Fields[attackcard.Controller].BattlingMonster = attackcard;
             _duel.Fields[1 - attackcard.Controller].BattlingMonster = defendcard;
             _duel.Fields[1 - attackcard.Controller].UnderAttack = true;
@@ -1145,7 +1184,7 @@ namespace WindBot.Game
                 Connection.Send(CtosMessage.Response, 0);
                 return;
             }
-            
+
             if (card.Id == 0)
                 card.SetId(cardId);
 
@@ -1342,7 +1381,7 @@ namespace WindBot.Game
 
             if (max <= 0)
                 max = 99;
-            
+
             IList<ClientCard> mandatoryCards = new List<ClientCard>();
             IList<ClientCard> cards = new List<ClientCard>();
 

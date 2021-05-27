@@ -382,7 +382,7 @@ namespace WindBot.Game
         public MainPhaseAction OnSelectIdleCmd(MainPhase main)
         {
             Executor.SetMain(main);
-            Console.WriteLine("||||||||||||||||||||||main phase||||||||||||||||||||||||||");
+            //Console.WriteLine("||||||||||||||||||||||main phase||||||||||||||||||||||||||");
             foreach (CardExecutor exec in Executor.Executors)
             {
             	if (exec.Type == ExecutorType.GoToEndPhase && main.CanEndPhase && exec.Func()) // check if should enter end phase directly
@@ -397,7 +397,7 @@ namespace WindBot.Game
                 // NOTICE: GoToBattlePhase and GoToEndPhase has no "card" can be accessed to ShouldExecute(), so instead use exec.Func() to check ...
                 // enter end phase and enter battle pahse is in higher priority.
 
-                Console.WriteLine("===========================activates");
+                //Console.WriteLine("===========================activates");
                 for (int i = 0; i < main.ActivableCards.Count; ++i)
                 {
                     ClientCard card = main.ActivableCards[i];
@@ -407,7 +407,7 @@ namespace WindBot.Game
                         return new MainPhaseAction(MainPhaseAction.MainAction.Activate, card.ActionActivateIndex[main.ActivableDescs[i]]);
                     }
                 }
-                Console.WriteLine("===========================set");
+                //Console.WriteLine("===========================set");
                 foreach (ClientCard card in main.MonsterSetableCards)
                 {
                     if (ShouldExecute(exec, card, ExecutorType.MonsterSet))
@@ -429,10 +429,10 @@ namespace WindBot.Game
                         return new MainPhaseAction(MainPhaseAction.MainAction.SpSummon, card.ActionIndex);
                     }
                 }
-                Console.WriteLine("===========================summ");
+                //Console.WriteLine("===========================summ");
                 foreach (ClientCard card in main.SummonableCards)
                 {
-                    Console.WriteLine($"should summon? {card.Id}");
+                    //Console.WriteLine($"should summon? {card.Id}");
                     if (ShouldExecute(exec, card, ExecutorType.Summon))
                     {
                         _dialogs.SendSummon(card.Name);
@@ -617,7 +617,9 @@ namespace WindBot.Game
 
                     foreach (IEnumerable<ClientCard> combo in combos)
                     {
-                        Logger.DebugWriteLine("--");
+                        //Console.WriteLine("is debug show up");
+                        //Logger.DebugWriteLine("--");
+                        //Console.WriteLine("is debug show up");
                         s1 = 0;
                         s2 = 0;
                         foreach (ClientCard card in combo)
@@ -1117,10 +1119,12 @@ namespace WindBot.Game
             bool defaultResult = card != null && (exec.Type == type) && (exec.CardId == -1 || exec.CardId == card.Id ) && (exec.Func == null || exec.Func());
             bool result = greedyResult || defaultResult;
 
-            Console.WriteLine($"ShouldExecute {type} {exec.Type} {card.Id} -- {result}");
+            if (result){
+                Console.WriteLine($"ShouldExecute {type} {exec.Type} {card.Name} {card.Id} -- {result} | {defaultResult} {greedyResult}");
+            }
             if (card.Id != 0 && type == ExecutorType.Activate && result)
             {
-                Console.WriteLine($"activating {card.Id}");
+                //Console.WriteLine($"activating {card.Id}");
                 int count = card.IsDisabled() ? 3 : 1;
                 if (!_activatedCards.ContainsKey(card.Id))
                 {
