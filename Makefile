@@ -4,14 +4,16 @@ all: default
 
 default: help
 
-build:
+build: ## xbuild and chmod ./bin/Debug/WindBot.exe
 	xbuild
 	chmod +x ./bin/Debug/WindBot.exe
 
-run:
-	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Deck=Beater
+run: ## run it
+	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Debug=True Deck=Beater
+runlog:
+	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Debug=True Deck=Beater | tee duel.log
 
-buildrun:build run
+buildrun:build run ## build then run
 
 help:
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
