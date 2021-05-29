@@ -53,6 +53,16 @@ namespace WindBot.Game
         {
             return _duel.IsFirst ? player : 1 - player;
         }
+        public string GetLocalPlayerName(int player)
+        {
+            //reverse GetLocalPlayer....
+            int absplayer = _duel.IsFirst ? 1 + player : player;
+            string name = _room.Names[absplayer];
+            string roomnames = string.Join(",", _room.Names);
+
+            Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={absplayer}");
+            return name;
+        }
 
         public void OnPacket(BinaryReader packet)
         {
@@ -289,8 +299,8 @@ namespace WindBot.Game
 
 
             string otherName = (player != 0) ? _room.Names[1] : _room.Names[0];
-            string myName = (player == 0) ? _room.Names[1] : _room.Names[0];
-            Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={player};myName={myName};otherName={otherName}");
+            string myName = (player == 0) ? _room.Names[0] : _room.Names[1];
+            //Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={player};myName={myName};otherName={otherName}");
             if (player < 4)
                 Logger.DebugWriteLine(otherName + " say to " + myName + ": " + message);
         }
@@ -382,7 +392,7 @@ namespace WindBot.Game
             int player = GetLocalPlayer(packet.ReadByte());
             int count = packet.ReadByte();
             if (_debug)
-                Logger.WriteLine("(" + player.ToString() + " draw " + count.ToString() + " card)");
+                Logger.WriteLine("(" + GetLocalPlayerName(player) + " draw " + count.ToString() + " card)");
 
             for (int i = 0; i < count; ++i)
             {
@@ -489,17 +499,17 @@ namespace WindBot.Game
                 Logger.WriteLine("*********Bot Hand*********");
                 foreach (ClientCard card in _duel.Fields[0].Hand)
                 {
-                    Logger.WriteLine(card.Name);
+                    if (card?.Name != null) { Logger.WriteLine($"{card.Id}|{card.Name}"); }
                 }
                 Logger.WriteLine("*********Bot Spell*********");
                 foreach (ClientCard card in _duel.Fields[0].SpellZone)
                 {
-                    Logger.WriteLine(card?.Name);
+                    if (card?.Name != null) { Logger.WriteLine($"{card.Id}|{card.Name}"); }
                 }
                 Logger.WriteLine("*********Bot Monster*********");
                 foreach (ClientCard card in _duel.Fields[0].MonsterZone)
                 {
-                    Logger.WriteLine(card?.Name);
+                    if (card?.Name != null) { Logger.WriteLine($"{card.Id}|{card.Name}"); }
                 }
                 Logger.WriteLine("*********Finish*********");
             }
@@ -536,10 +546,10 @@ namespace WindBot.Game
                 string myName = _room.Names[absplayer];
                 string roomnames = string.Join(",", _room.Names);
 
-                Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={absplayer};myName={myName};otherName={otherName}");
+                //Logger.DebugWriteLine($"ROOMNAMES: {roomnames}; player={absplayer};myName={myName};otherName={otherName}");
 
-                Logger.WriteLine("(" + player.ToString() + " got damage , LifePoint left = " + final.ToString() + ")");
-                Logger.WriteLine("(" + myName + " got damage , LifePoint left = " + final.ToString() + ")");
+                Logger.WriteLine("(" + GetLocalPlayerName(player) + " got damage , LifePoint left = " + final.ToString() + ")");
+                //Logger.WriteLine("(" + myName + " got damage , LifePoint left = " + final.ToString() + ")");
             }
             _duel.Fields[player].LifePoints = final;
         }
@@ -549,7 +559,7 @@ namespace WindBot.Game
             int player = GetLocalPlayer(packet.ReadByte());
             int final = _duel.Fields[player].LifePoints + packet.ReadInt32();
             if (_debug)
-                Logger.WriteLine("(" + player.ToString() + " got healed , LifePoint left = " + final.ToString() + ")");
+                Logger.WriteLine("(" + GetLocalPlayerName(player) + " got healed , LifePoint left = " + final.ToString() + ")");
             _duel.Fields[player].LifePoints = final;
         }
 
@@ -680,7 +690,7 @@ namespace WindBot.Game
             if (_debug)
             {
                 if (defendcard == null) Logger.WriteLine("(" + (attackcard.Name ?? "UnKnowCard") + " direct attack!!)");
-                else Logger.WriteLine("(" + ca.ToString() + " 's " + (attackcard.Name ?? "UnKnowCard") + " attack  " + cd.ToString() + " 's " + (defendcard.Name ?? "UnKnowCard") + ")");
+                else Logger.WriteLine("(" + GetLocalPlayerName(ca) + " 's " + (attackcard.Name ?? "UnKnowCard") + " attack  " + cd.ToString() + " 's " + (defendcard.Name ?? "UnKnowCard") + ")");
             }
             _duel.Fields[attackcard.Controller].BattlingMonster = attackcard;
             _duel.Fields[1 - attackcard.Controller].BattlingMonster = defendcard;
@@ -735,7 +745,7 @@ namespace WindBot.Game
                 card.SetId(cardId);
             int cc = GetLocalPlayer(packet.ReadByte());
             if (_debug)
-                if (card != null) Logger.WriteLine("(" + cc.ToString() + " 's " + (card.Name ?? "UnKnowCard") + " activate effect)");
+                if (card != null) Logger.WriteLine("(" + GetLocalPlayerName(cc)+ "'s " + (card.Name ?? "UnKnowCard") + " activate effect)");
             _ai.OnChaining(card, cc);
             //_duel.ChainTargets.Clear();
             _duel.ChainTargetOnly.Clear();
