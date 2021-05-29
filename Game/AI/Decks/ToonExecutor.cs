@@ -59,8 +59,27 @@ namespace WindBot.Game.AI.Decks
             AddExecutor(ExecutorType.Activate, CardId.Terraforming, TerraformingEffect);
             AddExecutor(ExecutorType.Activate, CardId.ToonKingdom, FieldSpellActivate); // TODO check deck > 3?
             AddExecutor(ExecutorType.Activate, CardId.ToonWorld, ToonWorldEffect);
+
+            AddExecutor(ExecutorType.Summon, CardId.TheBlackStoneofLegend);
+
+            AddExecutor(ExecutorType.Activate, CardId.TheBlackStoneofLegend, TheBlackStoneofLegendEffect);
+            AddExecutor(ExecutorType.Activate, CardId.RedEyesToonDragon, RedEyesToonDragonEffect);
         }
 
+        private bool RedEyesToonDragonEffect()
+        {
+            Logger.WriteLine("RedEyesToonDragonEffect");
+            return true;
+        }
+
+        private bool TheBlackStoneofLegendEffect()
+        {
+            Logger.WriteLine("TheBlackStoneofLegendEffect");
+            AI.SelectCard(
+                CardId.RedEyesToonDragon
+                );
+            return true;
+        }
         private bool TerraformingEffect()
         {
             AI.SelectCard(CardId.ToonKingdom);
