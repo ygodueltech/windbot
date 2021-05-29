@@ -49,8 +49,39 @@ namespace WindBot.Game.AI.Decks
 
         public ToonExecutor(GameAI ai, Duel duel) : base(ai, duel)
         {
-            //AddExecutor(ExecutorType.Summon, CardId.AlexandriteDragon);
+            /* hand:
+                     1  73628505 - Terraforming
+                     2  28711704 - Toon Black Luster Soldier
+                     3  43175858 - Toon Kingdom
+                     4  66574418 - The Black Stone of Legend
+                     5  28711704 - Toon Black Luster Soldier
+             */
+            AddExecutor(ExecutorType.Activate, CardId.Terraforming, TerraformingEffect);
+            AddExecutor(ExecutorType.Activate, CardId.ToonKingdom, FieldSpellActivate); // TODO check deck > 3?
+            AddExecutor(ExecutorType.Activate, CardId.ToonWorld, ToonWorldEffect);
         }
+
+        private bool TerraformingEffect()
+        {
+            AI.SelectCard(CardId.ToonKingdom);
+            return true;
+        }
+
+        private bool FieldSpellActivate()
+        {
+            //Do not replace own field spell!
+            if (Bot.SpellZone[5] != null) {
+                return false;
+            }
+            return true;
+        }
+
+        private bool ToonWorldEffect()
+        {
+            if (Bot.LifePoints <= 1000) return false;
+            return true;
+        }
+
 
     }
 }
