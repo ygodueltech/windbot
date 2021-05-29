@@ -1,5 +1,7 @@
 .PHONY: build run help
 
+DECK="Dragun"
+
 all: default
 
 default: help
@@ -9,9 +11,9 @@ build: ## xbuild and chmod ./bin/Debug/WindBot.exe
 	chmod +x ./bin/Debug/WindBot.exe
 
 run: ## run it
-	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Debug=True Deck=Beater
-runlog:
-	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Debug=True Deck=Beater | tee duel.log
+	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Debug=True Deck=$(DECK) Name=p$(DECK)
+runlog: ## run logging stdout to duel.log
+	./bin/Debug/WindBot.exe Host=127.0.0.1 Port=7911 Debug=True Deck=$(DECK) Name=p$(DECK) | tee duel.log
 
 buildrun:build run ## build then run
 
